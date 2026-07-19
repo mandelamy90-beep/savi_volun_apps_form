@@ -104,7 +104,7 @@ document.getElementById("submitBtn").onclick=async()=>{
 
     });
 
-    const res=await fetch("/api/submit",{
+    const res=await fetch("https://voln-rc-api.savi.api.dolphinnetwork.ie/api/submit",{
 
         method:"POST",
 
