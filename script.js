@@ -1,67 +1,115 @@
 const questions = [
 
-{
-    id:"name",
-    label:"Name",
-    type:"text"
-},
+    {
+        id: "name",
+        label: "Name",
+        required: true,
+        type: "text"
+    },
 
-{
-    id:"email",
-    label:"Email",
-    type:"email"
-},
+    {
+        id: "email",
+        label: "Email",
+        required: true,
+        type: "email"
+    },
 
-{
-    id:"age",
-    label:"Age",
-    type:"number"
-},
+    {
+        id: "age",
+        label: "Age",
+        required: true,
+        type: "number"
+    },
 
-{
-    id:"about",
-    label:"Tell us about yourself",
-    type:"textarea"
-},
+    {
+        id: "about",
+        label: "Tell us about yourself",
+        required: true,
+        type: "textarea"
+    },
 
-{
-    id:"terms",
-    label:"Do you accept the Terms of Service?",
-    type:"checkbox"
-}
+    {
+        id: "role",
+        label: "How did you find us?",
+        type: "radio",
+        required: true,
+        options: [
+            "Instagram",
+            "X/Twitter",
+            "Bluesky",
+            "Youtube",
+            "TikTok",
+            "Other"
+        ]
+    },
+
+    {
+        id: "terms",
+        label: "Do you accept the Terms of Service?",
+        type: "checkbox"
+    }
 
 ];
 
-const form=document.getElementById("dynamicForm");
+const form = document.getElementById("dynamicForm");
 
-questions.forEach(q=>{
+questions.forEach(q => {
 
-    const div=document.createElement("div");
-    div.className="field";
+    const div = document.createElement("div");
+    div.className = "field";
 
-    const label=document.createElement("label");
-    label.textContent=q.label;
+    const label = document.createElement("label");
+    label.textContent = q.label;
 
     div.appendChild(label);
 
     let input;
 
-    switch(q.type){
+    switch (q.type) {
+        case "radio":
+
+            input = document.createElement("div");
+
+            q.options.forEach((option, index) => {
+
+                const wrapper = document.createElement("label");
+
+                const radio = document.createElement("input");
+
+                radio.type = "radio";
+                radio.name = q.id;
+                radio.value = option;
+
+                if (q.required && index === 0) {
+                    radio.required = true;
+                }
+
+                wrapper.appendChild(radio);
+
+                wrapper.appendChild(
+                    document.createTextNode(option)
+                );
+
+                input.appendChild(wrapper);
+
+            });
+
+            break;
 
         case "textarea":
 
-            input=document.createElement("textarea");
+            input = document.createElement("textarea");
             break;
 
         case "select":
 
-            input=document.createElement("select");
+            input = document.createElement("select");
 
-            q.options.forEach(option=>{
+            q.options.forEach(option => {
 
-                const o=document.createElement("option");
-                o.value=option;
-                o.textContent=option;
+                const o = document.createElement("option");
+                o.value = option;
+                o.textContent = option;
                 input.appendChild(o);
 
             });
@@ -70,18 +118,22 @@ questions.forEach(q=>{
 
         case "checkbox":
 
-            input=document.createElement("input");
-            input.type="checkbox";
+            input = document.createElement("input");
+            input.type = "checkbox";
             break;
 
         default:
 
-            input=document.createElement("input");
-            input.type=q.type;
+            input = document.createElement("input");
+            input.type = q.type;
 
     }
 
-    input.id=q.id;
+    input.id = q.id;
+
+    if (q.required) {
+        input.required = true;
+    }
 
     div.appendChild(input);
 
@@ -89,34 +141,59 @@ questions.forEach(q=>{
 
 });
 
-document.getElementById("submitBtn").onclick=async()=>{
+document.getElementById("submitBtn").onclick=async(e)=>{
 
-    const answers={};
+    if(!document.getElementById("dynamicForm").checkValidity()){
 
-    questions.forEach(q=>{
+        document.getElementById("dynamicForm").reportValidity();
 
-        const el=document.getElementById(q.id);
+        return;
 
-        if(q.type==="checkbox")
-            answers[q.id]=el.checked;
-        else
-            answers[q.id]=el.value;
+    }
+
+    const answers = {};
+
+    questions.forEach(q => {
+
+        const el = document.getElementById(q.id);
+
+        if (q.type === "checkbox") {
+
+            answers[q.id] = el.checked;
+
+        }
+
+        else if (q.type === "radio") {
+
+            const selected = document.querySelector(
+                `input[name="${q.id}"]:checked`
+            );
+
+            answers[q.id] = selected ? selected.value : null;
+
+        }
+
+        else {
+
+            answers[q.id] = el.value;
+
+        }
 
     });
 
-    const res=await fetch("https://voln-rc-api.savi.api.dolphinnetwork.ie/api/submit",{
+    const res = await fetch("https://voln-rc-api.savi.api.dolphinnetwork.ie/api/submit", {
 
-        method:"POST",
+        method: "POST",
 
-        headers:{
-            "Content-Type":"application/json"
+        headers: {
+            "Content-Type": "application/json"
         },
 
-        body:JSON.stringify(answers)
+        body: JSON.stringify(answers)
 
     });
 
-    if(res.ok){
+    if (res.ok) {
 
         alert("Submitted!");
 
@@ -124,7 +201,7 @@ document.getElementById("submitBtn").onclick=async()=>{
 
     }
 
-    else{
+    else {
 
         alert("Submission failed due to API error. Error code 4052.");
 
