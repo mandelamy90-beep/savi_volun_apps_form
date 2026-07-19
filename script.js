@@ -36,8 +36,6 @@ const questions = [
         options: [
             "Instagram",
             "X/Twitter",
-            "Bluesky",
-            "Youtube",
             "TikTok",
             "Other"
         ]
